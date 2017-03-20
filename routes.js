@@ -1,5 +1,5 @@
 const request = require('request');
-const fs = require('fs');
+// const fs = require('fs');
 const express = require('express');
 const record = require('node-record-lpcm16');
 const router = new express.Router();
@@ -15,12 +15,9 @@ router.post('/token', (req, res, next) => {
       grant_type: "client_credentials",
       apiKey: apiKey
     }
-  }, function(err, response, body) {
-    if (err) {
-      console.log('error:', err);
-    } else {
-      res.send({token: JSON.parse(body).access_token});
-    };
+  }, (err, response, body) => {
+    err ? console.log(err) :
+    res.send({token: JSON.parse(body).access_token})
   });
 });
 
@@ -31,12 +28,9 @@ router.post('/start', (req, res, next) => {
     body: JSON.stringify({
       "dataFormat": {"type": "WAV"}
     })
-  }, function(err, response, body) {
-    if (err) {
-      console.log('error:', err);
-    } else {
-      res.send(JSON.parse(body));
-    };
+  }, (err, response, body) => {
+    return err ? console.log(err) :
+    res.send(JSON.parse(body));
   });
 });
 
@@ -49,14 +43,22 @@ router.post('/upstream', (req, res, next) => {
     request.post({
       url: `${baseUri+req.body.recordingId}`,
       headers: {'Authorization': `Bearer ${req.body.token}`}
-    }, function(err, response, body) {
-      if (err) {
-        console.log('error:', err);
-      } else {
-        res.send(JSON.parse(body));
-      }
+    }, (err, response, body) => {
+      return err ? console.log(err) :
+      res.send(JSON.parse(body));
     })
-  )
+  );
 });
+
+router.post('/analysis', (req, res, next) => {
+  console.log('analysis req', req.body.offsetMs)
+  return request.get({
+    url: `${baseUri+req.body.recordingId}/analysis?fromMs=${req.body.offsetMs}`,
+    headers: {'Authorization': `Bearer ${req.body.token}`}
+  }, (err, response, body) => {
+    return err ? console.log(err) :
+    res.send(JSON.parse(body));
+  })
+})
 
 module.exports = router;

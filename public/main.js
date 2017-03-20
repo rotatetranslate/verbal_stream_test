@@ -1,47 +1,50 @@
-$(function() {
+const analyzeVoice = () => getAccessToken().then(() => startSession().then(id => upstream(id)));
 
-  $('#sendfile').on('click', analyzeFile);
-  // $('#analysis').on('click', check);
+document.querySelector('#start').addEventListener('click', analyzeVoice);
 
-  function getAccessToken() {
-    console.log('retreiving access token...');
-    return $.post('/token')
-      .done(function(data) {
-        console.log(data);
-        window.localStorage.setItem('bvToken', data.token);
-      });
-  }
+function getAccessToken() {
+  console.log('retrieving access token...');
+  return fetch('/token', {
+    method: 'post'
+  })
+  .then(res => res.json())
+  .then(data => {
+    window.localStorage.setItem('bvToken', data.token)
+  })
+  .catch(err => console.log(err))
+}
 
-  function startSession() {
-    console.log('starting analysis session...');
-    return $.post('/start', {token: localStorage.getItem('bvToken')})
-      .done(function(data) {
-        console.log(data);
-        return data.recordingId;
-      })
-  }
-
-  function upstream(id) {
-    console.log('sending .wav for analysis...');
-    return $.post('/upstream', {
-      token: localStorage.getItem('bvToken'),
-      recordingId: id.recordingId,
-      wav: $('#file').val()
+function startSession() {
+  console.log('starting analysis section...');
+  return fetch('/start', {
+    method: 'post',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      token: localStorage.getItem('bvToken')
     })
-      .done(function(data) {
-        console.log(data);
-      })
-  }
+  })
+  .then(res => res.json())
+  .then(data => data.recordingId)
+  .catch(err => console.log(err))
+}
 
-  function analyzeFile() {
-    // console.log($('#file'));
-    return getAccessToken()
-      .then(function() {
-        return startSession()
-          .then(function(id) {
-            return upstream(id)
-          })
-      });
-  }
-
-});
+function upstream(id) {
+  console.log('recording...');
+  return fetch('/upstream', {
+    method: 'post',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      token: localStorage.getItem('bvToken'),
+      recordingId: id
+    })
+  })
+  .then(res => res.json())
+  .then(data => console.log(data))
+  .catch(err => console.log(err))
+}

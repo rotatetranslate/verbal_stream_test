@@ -40,21 +40,6 @@ router.post('/start', (req, res, next) => {
   });
 });
 
-// router.post('/upstream', (req, res, next) => {
-//   return request.post({
-//     url: `${baseUri+req.body.recordingId}`,
-//     headers: {'Authorization': `Bearer ${req.body.token}`},
-//     // body: req.body.wav
-//     body: fs.createReadStream('/Users/adamberro/Downloads/Sample2.wav')
-//   }, function(err, response, body) {
-//     if (err) {
-//       console.log('error:', err);
-//     } else {
-//       res.send(JSON.parse(body));
-//     }
-//   })
-// })
-
 router.post('/upstream', (req, res, next) => {
   return record.start({
     sampleRate : 44100,
